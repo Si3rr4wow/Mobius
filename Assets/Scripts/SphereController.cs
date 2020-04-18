@@ -34,11 +34,19 @@ public class SphereController : MonoBehaviour
     if(gamepad == null) return;
 
     characterController.Move(GetNextMove());
+    transform.Rotate(GetMusteredRotation());
   }
 
   void OnControllerColliderHit(ControllerColliderHit hit)
   {
     surfaceNormal = hit.normal;
+  }
+
+  Vector3 GetMusteredRotation()
+  {
+    Vector2 rightStickInputVector = gamepad.rightStick.ReadValue().normalized;
+
+    return new Vector3(0, rightStickInputVector.x, 0);
   }
 
   Vector3 GetNextMove()
@@ -89,12 +97,9 @@ public class SphereController : MonoBehaviour
     friction.y = lastVelocity.y * frictionCoefficient * normalForce;
     friction.z = lastVelocity.z * frictionCoefficient * normalForce;
 
-    Debug.Log(friction);
-
     acceleration.x -= friction.x;
     acceleration.y -= friction.y;
     acceleration.z -= friction.z;
-    // acceleration -= friction;
 
     return acceleration;
   }
@@ -112,9 +117,32 @@ public class SphereController : MonoBehaviour
   {
     Vector2 leftStickInputVector = gamepad.leftStick.ReadValue().normalized;
 
-    acceleration.x += leftStickInputVector.x * musterableHorizontalForce;
-    acceleration.z += leftStickInputVector.y * musterableHorizontalForce;
+    float forwardRotationAngle = Vector3.Angle(Vector3.forward, transform.forward);
+    float rightRotationAngle = Vector3.Angle(transform.forward, Vector3.right);
+    int rotationSign = rightRotationAngle < 90 ? -1 : +1;
+
+    float xLocal = leftStickInputVector.x * musterableHorizontalForce;
+    float zLocal = leftStickInputVector.y * musterableHorizontalForce;
+
+    Vector2 local = new Vector2(xLocal, zLocal);
+
+    Vector2 global = RotateVector2(local, rotationSign * forwardRotationAngle);
+
+    acceleration.x += global.x;
+    acceleration.z += global.y;
 
     return acceleration;
+  }
+
+  Vector2 RotateVector2(Vector2 vector, float degrees)
+  {
+    float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
+    float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
+
+    Vector2 rotatedVector = new Vector2(0,0);
+    rotatedVector.x = (cos * vector.x) - (sin * vector.y);
+    rotatedVector.y = (sin * vector.x) + (cos * vector.y);
+
+    return rotatedVector;
   }
 }
