@@ -13,6 +13,8 @@ public class SphereController : MonoBehaviour
 
   public float musterableHorizontalForce = 6.0f;
   public float musterableVerticleForce = 2000.0f;
+  public float musterableRotationSpeed = 6.0f;
+
   public float mass = 10f;
 
   private Vector3 lastPosition;
@@ -44,9 +46,9 @@ public class SphereController : MonoBehaviour
 
   Vector3 GetMusteredRotation()
   {
-    Vector2 rightStickInputVector = gamepad.rightStick.ReadValue().normalized;
+    Vector2 rightStickInputVector = gamepad.rightStick.ReadValue();
 
-    return new Vector3(0, rightStickInputVector.x, 0);
+    return new Vector3(0, rightStickInputVector.x * musterableRotationSpeed, 0);
   }
 
   Vector3 GetNextMove()
@@ -115,7 +117,7 @@ public class SphereController : MonoBehaviour
 
   Vector3 WithMusteredHorizontal(Vector3 acceleration)
   {
-    Vector2 leftStickInputVector = gamepad.leftStick.ReadValue().normalized;
+    Vector2 leftStickInputVector = gamepad.leftStick.ReadValue();
 
     float forwardRotationAngle = Vector3.Angle(Vector3.forward, transform.forward);
     float rightRotationAngle = Vector3.Angle(transform.forward, Vector3.right);
